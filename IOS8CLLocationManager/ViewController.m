@@ -84,15 +84,17 @@
     if(![CLLocationManager locationServicesEnabled]){
         [self alert:@"定位需开启定位服务:设置 > 隐私 > 位置 > 定位服务" autoDismiss:YES];
     }else{
-        
         if([[[UIDevice currentDevice] systemVersion] compare:@"8.0"] != NSOrderedAscending){
             NSUInteger code = [CLLocationManager authorizationStatus];
             if (code == kCLAuthorizationStatusNotDetermined && ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)] || [self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])) {
                 // choose one request according to your business.
                 if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]){
                     //[self.locationManager requestAlwaysAuthorization];
-                    requestAlwaysAuthorization(self.locationManager);
-                    
+                    //requestAlwaysAuthorization(self.locationManager); //#define
+                    SEL requestAlwaysAuthorizationSEL = NSSelectorFromString(@"requestAlwaysAuthorization");
+                    if ([self.locationManager respondsToSelector:requestAlwaysAuthorizationSEL]) {
+                        [self.locationManager performSelector:requestAlwaysAuthorizationSEL];
+                    }
                     isLocation = YES;
                     [self.locationManager startUpdatingLocation];
                     // 开始计时
