@@ -13,21 +13,13 @@ Core code
 ---  
 
 ```objective-c
-#ifdef __IPHONE_8_0
-    NSUInteger code = [CLLocationManager authorizationStatus];
-    if (code == kCLAuthorizationStatusNotDetermined && ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)] || [self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])) {
-        // choose one request according to your business.
-        if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]){
-            [self.locationManager requestAlwaysAuthorization];
-        } else if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]) {
-            [self.locationManager  requestWhenInUseAuthorization];
-        } else {
-            NSLog(@"Info.plist does not contain NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription");
+       // ios 8 or later
+        SEL requestAlwaysAuthorizationSEL = NSSelectorFromString(@"requestAlwaysAuthorization");
+        if ([self.locationManager respondsToSelector:requestAlwaysAuthorizationSEL]) {
+            [self.locationManager performSelector:requestAlwaysAuthorizationSEL];
         }
-    }
-#endif
-    [self.locationManager startUpdatingLocation];
-    
+        
+        [self.locationManager startUpdatingLocation];
 ```
 Image
 ---  

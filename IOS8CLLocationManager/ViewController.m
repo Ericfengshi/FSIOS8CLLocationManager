@@ -84,61 +84,25 @@
     if(![CLLocationManager locationServicesEnabled]){
         [self alert:@"定位需开启定位服务:设置 > 隐私 > 位置 > 定位服务" autoDismiss:YES];
     }else{
-        if([[[UIDevice currentDevice] systemVersion] compare:@"8.0"] != NSOrderedAscending){
-            NSUInteger code = [CLLocationManager authorizationStatus];
-            if (code == kCLAuthorizationStatusNotDetermined && ([self.locationManager respondsToSelector:@selector(requestAlwaysAuthorization)] || [self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)])) {
-                // choose one request according to your business.
-                if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationAlwaysUsageDescription"]){
-                    //[self.locationManager requestAlwaysAuthorization];
-                    //requestAlwaysAuthorization(self.locationManager); //#define
-                    SEL requestAlwaysAuthorizationSEL = NSSelectorFromString(@"requestAlwaysAuthorization");
-                    if ([self.locationManager respondsToSelector:requestAlwaysAuthorizationSEL]) {
-                        [self.locationManager performSelector:requestAlwaysAuthorizationSEL];
-                    }
-                    isLocation = YES;
-                    [self.locationManager startUpdatingLocation];
-                    // 开始计时
-                    [self startTime];
-                    [self alert:@"正在获取位置信息..." autoDismiss:NO];
-                    
-                } else if([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"]) {
-                    //[self.locationManager requestWhenInUseAuthorization];
-                } else {
-                    NSLog(@"Info.plist does not contain NSLocationAlwaysUsageDescription or NSLocationWhenInUseUsageDescription");
-                }
-                return;
-            }
+        // ios 8 or later
+        SEL requestAlwaysAuthorizationSEL = NSSelectorFromString(@"requestAlwaysAuthorization");
+        if ([self.locationManager respondsToSelector:requestAlwaysAuthorizationSEL]) {
+            [self.locationManager performSelector:requestAlwaysAuthorizationSEL];
+        }
+        
+        [self.locationManager startUpdatingLocation];
+        if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
             
-            if([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
-                
-                NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-                NSString *appName = [infoDict objectForKey:@"CFBundleDisplayName"];
-                NSString *message = [NSString stringWithFormat:@"请开启本应用定位:设置 > 隐私 > 位置 > 定位服务 下 %@",appName];
-                
-                [self alert:message autoDismiss:YES];
-
-            }else{
-                isLocation = YES;
-                [self.locationManager startUpdatingLocation];
-                // 开始计时
-                [self startTime];
-                [self alert:@"正在获取位置信息..." autoDismiss:NO];
-            }
+            NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
+            NSString *appName = [infoDict objectForKey:@"CFBundleDisplayName"];
+            NSString *message = [NSString stringWithFormat:@"请开启本应用定位:设置 > 隐私 > 位置 > 定位服务 下 %@",appName];
+            
+            [self alert:message autoDismiss:YES];
         }else{
-            [self.locationManager startUpdatingLocation];
-            if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorized) {
-                
-                NSDictionary* infoDict = [[NSBundle mainBundle] infoDictionary];
-                NSString *appName = [infoDict objectForKey:@"CFBundleDisplayName"];
-                NSString *message = [NSString stringWithFormat:@"请开启本应用定位:设置 > 隐私 > 位置 > 定位服务 下 %@",appName];
-                
-                [self alert:message autoDismiss:YES];
-            }else{
-                isLocation = YES;
-                
-                [self startTime];
-                [self alert:@"正在获取位置信息..." autoDismiss:NO];
-            }
+            isLocation = YES;
+            
+            [self startTime];
+            [self alert:@"正在获取位置信息..." autoDismiss:NO];
         }
     }
 }
